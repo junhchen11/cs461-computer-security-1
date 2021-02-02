@@ -7,6 +7,15 @@ push    %ebp
 mov     %esp,%ebp
 
 # Your code here
+# exec_ve
+mov $11, %eax
+mov $filename, %ebx
+push $0
+mov %esp, %ecx
+mov %esp, %edx
+int $0x80
 
 leave
 ret
+
+filename: .string "/bin/sh"
