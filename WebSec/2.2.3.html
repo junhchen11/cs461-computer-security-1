@@ -21,7 +21,6 @@ function payload(attacker) {
 		// overwrites current HTML. Execute a callback function when load has finished.
 		$('html').load(href, function() {
 
-			$("a:contains('script')").remove();
 			$("a:contains('svg')").remove();
 
 			// Show new HTML
