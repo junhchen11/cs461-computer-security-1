@@ -1,7 +1,7 @@
 import sys
 from Crypto.Cipher import AES
 
-_, in_file = sys.argv
+in_file = sys.argv[1]
 with open(in_file) as inf:
     input = inf.read().strip()
 input = bytes.fromhex(input)
