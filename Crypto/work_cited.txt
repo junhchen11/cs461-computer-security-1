@@ -1,0 +1,2 @@
+https://stackoverflow.com/questions/4798654/modular-multiplicative-inverse-function-in-python
+https://crypto.stackexchange.com/questions/19444/rsa-given-q-p-and-e
