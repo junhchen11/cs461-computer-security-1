@@ -1,0 +1,7 @@
+
+"""
+
+from hashlib import sha256
+dig = sha256(blob.encode()).hexdigest()
+if int(ord(dig[0]))%2: print("I come in peace.")
+else: print("Prepare to be destroyed!")
