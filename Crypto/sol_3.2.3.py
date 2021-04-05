@@ -45,7 +45,6 @@ def find_plaintext(ciphertext, url):
     plaintext = b''
     for block_index in range(len(blocks) - 2, -1, -1):
         plaintext = find_block(blocks[block_index : block_index + 2], url) + plaintext
-    print(plaintext)
     return plaintext
 
 
