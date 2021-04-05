@@ -59,8 +59,22 @@ if __name__ == '__main__':
     outfile = sys.argv[2]
     p = number.getPrime(1024)
     q = number.getPrime(1024)
+
+    assert(p.bit_length() == 1024)
+    assert(q.bit_length() == 1024)
+    while (p*q).bit_length() == 2048:
+        p = number.getPrime(1024)
+        q = number.getPrime(1024)
+    assert((p*q).bit_length() == 2047)
+
     privkey, pubkey = make_privkey(p, q)
-    cert = make_cert(netid, pubkey)
+    cert = make_cert(netid, pubkey, serial=0x0102030405060708090a0b0c0d0e)
+    prefix = cert.tbs_certificate_bytes[:0xc0]
+
+    with open('cert-prefix', 'wb') as prefix_file:
+        prefix_file.write(prefix)
+
+    print('modulus', hex(pubkey.public_numbers().n))
     print('md5 of cert.tbs_certificate_bytes:', hashlib.md5(cert.tbs_certificate_bytes).hexdigest())
 
     # We will check that your certificate is DER encoded
