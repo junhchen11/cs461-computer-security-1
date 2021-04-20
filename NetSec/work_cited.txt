@@ -2,3 +2,4 @@ https://dev.to/ankitdobhal/syn-stealth-scan-with-power-of-python-scapy-58aj
 https://stackoverflow.com/questions/61857033/scapy-how-to-forward-packets-after-using-arpspoof
 https://0xbharath.github.io/art-of-packet-crafting-with-scapy/network_attacks/arp_spoofing/index.html
 https://gist.github.com/Matir/a2b230c6bb716e1fd88c94203154c475
+https://www.thepythoncode.com/article/make-dns-spoof-python
