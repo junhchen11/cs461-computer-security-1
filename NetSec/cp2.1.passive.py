@@ -87,8 +87,8 @@ def find_cookie(payload):
     payload = payload.split('\r\n')
     cookie = None
     for s in payload:
-        if s.find('Set-Cookie: session=') != -1:
-            cookie = s.split('=')[1]
+        if s.find('Set-Cookie:') != -1:
+            cookie = s.split(':')[1].strip()
             break
     return cookie
 
