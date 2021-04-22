@@ -102,7 +102,8 @@ def faketcp(packet):
             debug(f'Len more: {len_more}')
 
         packet.seq += tcpStates[state]['nb_more']
-        packet.ack -= tcpStates[state]['nb_more']
+        if packet[TCP].flags.A:
+            packet.ack -= tcpStates[state]['nb_more']
 
         if packet.haslayer(Raw):
             tcpStates[state]['nb_more'] += len_more
